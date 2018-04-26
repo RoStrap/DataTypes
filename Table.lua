@@ -50,7 +50,7 @@ function Table.CallOnDifferences(a1, a2, f1, f2)
 			b = b + 1
 		end
 
-		while a1[a] == a2[b] and a < a_max do
+		while a < a_max and a1[a] == a2[b] do
 			a = a + 1
 			b = b + 1
 		end
