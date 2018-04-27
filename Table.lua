@@ -2,6 +2,9 @@
 -- This Library is not for a bunch of for-loop wrapper functions.
 -- Either write your own for-loops or learn python instead
 
+local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
+local Debug = Resources:LoadLibrary("Debug")
+
 local Table = {}
 
 function Table.Move(a1, f, e, t, a2)
@@ -66,25 +69,25 @@ function Table.CallOnDifferences(a1, a2, f1, f2)
 	end
 end
 
-do
-	-- Create read-only table which cannot be written to or modified
+function Table.Lock(t)
+	-- Returns interface proxy which can read from table t but cannot modify it
 
-	local function ReadOnlyNewIndex(_, Index, _)
-		error("[Table] Cannot write to index \"" .. tostring(Index) .. "\" of read-only table", 2)
+	local ModuleName = getfenv(2).script.Name
+	
+	local Userdata = newproxy(true)
+	local Metatable = getmetatable(Userdata)
+	
+	function Metatable:__index(Index)
+		return t[Index] or Debug.Error("!%q does not exist in read-only table", ModuleName, Index)
 	end
-
-	local ReadOnlyMetatable = "[Table] Requested metatable of read-only table is locked"
-
-	function Table.Lock(t)
-		return setmetatable({}, {
-			__index = function(_, Index)
-				return t[Index] or error("[Table] \"" .. tostring(Index) .. "\" does not exist in read-only table", 2)
-			end;
-
-			__newindex = ReadOnlyNewIndex;
-			__metatable = ReadOnlyMetatable;
-		})
+	
+	function Metatable:__newindex(Index, Value)
+		Debug.Error("!Cannot write %s to index [%q] of read-only table", ModuleName, Value, Index)
 	end
+	
+	Metatable.__metatable = "[" .. ModuleName .. "] Requested metatable of read-only table is locked"
+	
+	return Userdata
 end
 
 return Table
