@@ -6,15 +6,14 @@ local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Res
 local Table = Resources:LoadLibrary("Table")
 
 local SortedArray = {}
-
-SortedArray.__index = setmetatable({
+SortedArray.__index = {
 	Next = next;
 	Unpack = unpack;
 	Set = rawset;
 	Get = rawget;
 	ForEach = table.foreach;
 	Concat = table.concat;
-}, {__index = table})
+}
 
 function SortedArray.new(Array)
 	if Array then
