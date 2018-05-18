@@ -1,6 +1,7 @@
 -- Utility Table functions
 -- This Library is not for a bunch of for-loop wrapper functions.
 -- Either write your own for-loops or learn python instead
+-- @author Validark
 
 local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
 local Debug = Resources:LoadLibrary("Debug")
@@ -27,46 +28,6 @@ function Table.Move(a1, f, e, t, a2)
 	end
 
 	return a2
-end
-
-function Table.CallOnDifferences(a1, a2, f1, f2)
-	-- Between sorted arrays a1 into a2, calls f1 for each addition to a1 and f2 for each removal from a1
-	-- 	Functions are called with values being added or removed
-	-- @param table a1 The first sorted array
-	-- @param table a2 The second sorted array
-	-- @param function f1 the first function
-	-- @param function f2 the second function
-	-- @returns nil
-	-- @example	a1 = {1, 2, 3, 4}
-	--			a2 = {0, 2, 3, 5}
-	--		calls f1(0), f2(1), f2(4), f1(5)
-
-	local a = 1
-	local b = 1
-
-	local a_max = #a1 + 1
-	local b_max = #a2 + 1
-
-	while a < a_max do
-		while b < b_max and a1[a] > a2[b] do
-			f1(a2[b])
-			b = b + 1
-		end
-
-		while a < a_max and a1[a] == a2[b] do
-			a = a + 1
-			b = b + 1
-		end
-
-		while a < a_max and (b == b_max or a2[b] > a1[a]) do
-			f2(a1[a])
-			a = a + 1
-		end
-	end
-
-	for i = b, b_max - 1 do
-		f1(a2[i])
-	end
 end
 
 function Table.Lock(t)
