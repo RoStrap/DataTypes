@@ -51,4 +51,4 @@ function Table.Lock(t)
 	return Userdata
 end
 
-return Table
+return Table.Lock(Table)
