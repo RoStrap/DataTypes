@@ -4,7 +4,6 @@
 -- @author Validark
 
 local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
-local Debug = Resources:LoadLibrary("Debug")
 
 local Table = {}
 
@@ -39,11 +38,11 @@ function Table.Lock(t)
 	local Metatable = getmetatable(Userdata)
 	
 	function Metatable:__index(Index)
-		return t[Index] or Debug.Error("!%q does not exist in read-only table", ModuleName, Index)
+		return t[Index] or Resources:LoadLibrary("Debug").Error("!%q does not exist in read-only table", ModuleName, Index)
 	end
 	
 	function Metatable:__newindex(Index, Value)
-		Debug.Error("!Cannot write %s to index [%q] of read-only table", ModuleName, Value, Index)
+		Resources:LoadLibrary("Debug").Error("!Cannot write %s to index [%q] of read-only table", ModuleName, Value, Index)
 	end
 	
 	Metatable.__metatable = "[" .. ModuleName .. "] Requested metatable of read-only table is locked"
