@@ -33,6 +33,7 @@ print(Debug.TableToString(Table.Move({1, 2, 3}, 1, 3, 2)))
 Converts a table into a read-only userdata.
 
 ## SortedArray
+A class to create sorted arrays. Must contain objects comparable to one another (that can use the `<` and `==` operators). Numbers and strings support these operators by default.
 ```lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
