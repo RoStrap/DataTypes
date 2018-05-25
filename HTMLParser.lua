@@ -10,7 +10,7 @@ HTMLParser.__index = {Position = 0}
 function HTMLParser.new(HTML)
 	return setmetatable({
 		HTML = HTML:gsub("%s+", " "):gsub("> <", "><"):gsub(" >", ">"):gsub("< ", "<");
-	}, HTMLParser):Next()
+	}, HTMLParser)
 end
 
 function HTMLParser.__index:Next()
