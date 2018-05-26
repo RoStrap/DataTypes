@@ -28,17 +28,29 @@ local insert = table.insert
 
 function SortedArray.__index:Insert(Value)
 	-- Inserts a Value into the SortedArray while maintaining its sortedness
+	-- Lua Binary Search :D
 
-	local TableLength = #self
+	local Low, High = 1, #self
 
-	for j = 1, TableLength do
-		if Value < self[j] then -- Determine whether `Value` precedes `self[j]` alphabetically/numerically
-			insert(self, j, Value)
-			return
-		end
+	local Middle do
+		local Sum = Low + High	
+		Middle = 0.5 * (Sum - Sum % 2)
 	end
 
-	self[TableLength + 1] = Value
+	while Middle ~= High do
+		if Value < self[Middle] then
+			High = Middle - 1
+		else
+			Low = Middle + 1
+		end
+	
+		local Sum = Low + High	
+		Middle = 0.5 * (Sum - Sum % 2)
+	end
+
+	local Position = Middle == 0 and 1 or Value < self[Middle] and Middle or Middle + 1
+	insert(self, Position, Value)
+	return Position
 end
 
 function SortedArray.__index:Copy()
