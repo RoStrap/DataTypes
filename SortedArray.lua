@@ -1,5 +1,6 @@
 -- Class that memoizes sorting by inserting values in order
 -- Elements must be able to evaluate comparisons to one another
+-- TODO: Optimize `Remove` and `Transform` to skip in a binary fashion
 -- @author Validark
 
 local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
