@@ -29,24 +29,29 @@ function Table.Move(a1, f, e, t, a2)
 	return a2
 end
 
-function Table.Lock(t)
-	-- Returns interface proxy which can read from table t but cannot modify it
+function Table.Lock(Tab)
+	-- Returns interface proxy which can read from table Tab but cannot modify it
 
 	local ModuleName = getfenv(2).script.Name
-	
+
 	local Userdata = newproxy(true)
 	local Metatable = getmetatable(Userdata)
-	
+
 	function Metatable:__index(Index)
-		return t[Index] or Resources:LoadLibrary("Debug").Error("!%q does not exist in read-only table", ModuleName, Index)
+		local Value = Tab[Index]
+		return Value ~= nil and Value or Resources:LoadLibrary("Debug").Error("!%q does not exist in read-only table", ModuleName, Index)
 	end
-	
+
 	function Metatable:__newindex(Index, Value)
 		Resources:LoadLibrary("Debug").Error("!Cannot write %s to index [%q] of read-only table", ModuleName, Value, Index)
 	end
-	
+
+	function Metatable:__tostring()
+		return ModuleName
+	end
+
 	Metatable.__metatable = "[" .. ModuleName .. "] Requested metatable of read-only table is locked"
-	
+
 	return Userdata
 end
 
