@@ -39,7 +39,7 @@ function Table.Lock(Tab)
 
 	function Metatable:__index(Index)
 		local Value = Tab[Index]
-		return Value ~= nil and Value or Resources:LoadLibrary("Debug").Error("!%q does not exist in read-only table", ModuleName, Index)
+		return Value == nil and Resources:LoadLibrary("Debug").Error("!%q does not exist in read-only table", ModuleName, Index) or Value
 	end
 
 	function Metatable:__newindex(Index, Value)
