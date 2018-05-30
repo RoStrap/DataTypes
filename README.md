@@ -46,6 +46,11 @@ local Sorted = SortedArray.new{2, 1, 5, 3} -- Will get `table.sort`ed
 ```
 
 ### API
+#### SortedArray.new([array InitialSet], [function SortFunction])
+Instantiates and returns a new SortedArray, with optional parameters. 
+- `InitialSet`: Pass in an array of data which will be sorted upon instantiation. If this is omitted, an empty array is used.
+- `SortFunction`: An optional comparison function which is used to customize the element sorting, which will be given two elements `a` and `b` from the array as parameters. The function should return a boolean value specifying whether the first argument should be before the second argument in the sequence. If no comparison function is passed, the Lua-default `a < b` sorting is used.
+
 #### SortedArray:Insert()
 Inserts an element in the proper place which would preserve the array's orderedness.
 ```lua
