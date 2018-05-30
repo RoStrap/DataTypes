@@ -14,14 +14,50 @@ SortedArray.__index = {
 	Get = rawget;
 	ForEach = table.foreach;
 	Concat = table.concat;
+	Sort = table.sort;
 }
 
-function SortedArray.new(Array)
-	if Array then
-		table.sort(Array)
+local function BinaryFindClosest(self, Value, Low, High)
+	local Middle do
+		local Sum = Low + High
+		Middle = 0.5 * (Sum - Sum % 2)
 	end
 
-	return setmetatable(Array or {}, SortedArray)
+	local Compare = self.Compare
+	local Value2 = self[Middle]
+
+	while Middle ~= High do
+		if Value == Value2 then
+			return Middle
+		end
+
+		if Compare(Value, Value2) then
+			High = Middle - 1
+		else
+			Low = Middle + 1
+		end
+
+		local Sum = Low + High
+		Middle = 0.5 * (Sum - Sum % 2)
+		Value2 = self[Middle]
+	end
+
+	return Middle
+end
+
+local function DefaultComparison(a, b)
+	return a < b
+end
+
+function SortedArray.new(Array, Function)
+	Function = Function or DefaultComparison
+
+	if Array then
+		Array.Compare = Function
+		table.sort(Array, Array.Compare)
+	end
+
+	return setmetatable(Array or {Compare = Function}, SortedArray)
 end
 
 local remove = table.remove
@@ -29,29 +65,18 @@ local insert = table.insert
 
 function SortedArray.__index:Insert(Value)
 	-- Inserts a Value into the SortedArray while maintaining its sortedness
-	-- Lua Binary Search :D
 
-	local Low, High = 1, #self
-
-	local Middle do
-		local Sum = Low + High	
-		Middle = 0.5 * (Sum - Sum % 2)
-	end
-
-	while Middle ~= High do
-		if Value < self[Middle] then
-			High = Middle - 1
-		else
-			Low = Middle + 1
-		end
-	
-		local Sum = Low + High	
-		Middle = 0.5 * (Sum - Sum % 2)
-	end
-
-	local Position = Middle == 0 and 1 or Value < self[Middle] and Middle or Middle + 1
+	local Position = BinaryFindClosest(self, Value, 1, #self)
+	Position = Position and (self.Compare(Value, self[Position]) and Position or Position + 1) or 1
 	insert(self, Position, Value)
 	return Position
+end
+
+function SortedArray.__index:Find(Value)
+	-- Finds a Value in a SortedArray and returns its position (or nil if non-existant)
+
+	local Position = BinaryFindClosest(self, Value, 1, #self)
+	return Position and Value == self[Position] and Position or nil
 end
 
 function SortedArray.__index:Copy()
@@ -88,6 +113,9 @@ function SortedArray.__index:Remove(a2)
 	else
 		return remove(self, a2)
 	end
+end
+
+function SortedArray.__index:SortElement()
 end
 
 local function Empty() end
