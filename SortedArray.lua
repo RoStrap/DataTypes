@@ -67,7 +67,8 @@ function SortedArray.__index:Insert(Value)
 	-- Inserts a Value into the SortedArray while maintaining its sortedness
 
 	local Position = BinaryFindClosest(self, Value, 1, #self)
-	Position = Position and (self.Compare(Value, self[Position]) and Position or Position + 1) or 1
+	local Value2 = self[Position]
+	Position = Value2 and (self.Compare(Value, Value2) and Position or Position + 1) or 1
 	insert(self, Position, Value)
 	return Position
 end
