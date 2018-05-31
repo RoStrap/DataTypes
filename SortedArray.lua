@@ -81,7 +81,7 @@ function SortedArray.__index:Find(Value)
 end
 
 function SortedArray.__index:Copy()
-	local New = SortedArray.new()
+	local New = {}
 
 	for i = 1, #self do
 		New[i] = self[i]
