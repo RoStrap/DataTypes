@@ -29,7 +29,7 @@ function Table.Move(a1, f, e, t, a2)
 	return a2
 end
 
-function Table.Lock(Tab)
+function Table.Lock(Tab, __call)
 	-- Returns interface proxy which can read from table Tab but cannot modify it
 
 	local ModuleName = getfenv(2).script.Name
@@ -50,6 +50,7 @@ function Table.Lock(Tab)
 		return ModuleName
 	end
 
+	Metatable.__call = __call
 	Metatable.__metatable = "[" .. ModuleName .. "] Requested metatable of read-only table is locked"
 
 	return Userdata
