@@ -1,37 +1,63 @@
 -- Class that memoizes sorting by inserting values in order
--- Elements must be able to evaluate comparisons to one another
--- TODO: Optimize `Remove` and `Transform` to skip in a binary fashion
 -- @author Validark
 
 local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
 local Table = Resources:LoadLibrary("Table")
 
+local sort = table.sort
+local insert = table.insert
+
 local SortedArray = {}
 SortedArray.__index = {
-	Next = next;
 	Unpack = unpack;
-	Set = rawset;
-	Get = rawget;
 	ForEach = table.foreach;
 	Concat = table.concat;
-	Sort = table.sort;
+	RemoveIndex = table.remove;
 }
 
-local function BinaryFindClosest(self, Value, Low, High)
+function SortedArray.new(Array, Comparison)
+	if Array then
+		sort(Array, Array.Compare or Comparison)
+	else
+		Array = {}
+	end
+
+	Array.Compare = Comparison
+
+	return setmetatable(Array, SortedArray)
+end
+
+local function FindClosest(self, Value, Low, High, Eq, Lt)
 	local Middle do
 		local Sum = Low + High
 		Middle = 0.5 * (Sum - Sum % 2)
 	end
 
-	local Compare = self.Compare
+	if Middle == 0 then
+		return nil
+	end
+
+	local Compare = Lt or self.Compare
 	local Value2 = self[Middle]
 
 	while Middle ~= High do
-		if Value == Value2 then
+		if Eq then
+			if Eq(Value, Value2) then
+				return Middle
+			end
+		elseif Value == Value2 then
 			return Middle
 		end
 
-		if Compare(Value, Value2) then
+		local Bool
+
+		if Compare then
+			Bool = Compare(Value, Value2)
+		else
+			Bool = Value < Value2
+		end
+
+		if Bool then
 			High = Middle - 1
 		else
 			Low = Middle + 1
@@ -45,39 +71,48 @@ local function BinaryFindClosest(self, Value, Low, High)
 	return Middle
 end
 
-local function DefaultComparison(a, b)
-	return a < b
-end
-
-function SortedArray.new(Array, Function)
-	Function = Function or DefaultComparison
-
-	if Array then
-		Array.Compare = Function
-		table.sort(Array, Array.Compare)
-	end
-
-	return setmetatable(Array or {Compare = Function}, SortedArray)
-end
-
-local remove = table.remove
-local insert = table.insert
-
 function SortedArray.__index:Insert(Value)
 	-- Inserts a Value into the SortedArray while maintaining its sortedness
 
-	local Position = BinaryFindClosest(self, Value, 1, #self)
+	local Position = FindClosest(self, Value, 1, #self)
 	local Value2 = self[Position]
-	Position = Value2 and (self.Compare(Value, Value2) and Position or Position + 1) or 1
+
+	if Value2 then
+		local Compare = self.Compare
+		local Bool
+
+		if Compare then
+			Bool = Compare(Value, Value2)
+		else
+			Bool = Value < Value2
+		end
+
+		Position = Bool and Position or Position + 1
+	else
+		Position = 1
+	end
+
 	insert(self, Position, Value)
+
 	return Position
 end
 
-function SortedArray.__index:Find(Value)
+function SortedArray.__index:Find(Value, Eq, Lt)
 	-- Finds a Value in a SortedArray and returns its position (or nil if non-existant)
 
-	local Position = BinaryFindClosest(self, Value, 1, #self)
-	return Position and Value == self[Position] and Position or nil
+	local Position = FindClosest(self, Value, 1, #self, Eq, Lt)
+
+	local Bool
+
+	if Position then
+		if Eq then
+			Bool = Eq(Value, self[Position])
+		else
+			Bool = Value == self[Position]
+		end
+	end
+
+	return Bool and Position or nil
 end
 
 function SortedArray.__index:Copy()
@@ -90,35 +125,33 @@ function SortedArray.__index:Copy()
 	return New
 end
 
-function SortedArray.__index:Remove(a2)
-	-- Remove all elements within a2 from self if a2 is a table
-	-- Falls back on table.remove otherwise
+function SortedArray.__index:RemoveElement(Signature, Eq, Lt)
+	local Position = self:Find(Signature, Eq, Lt)
 
-	if type(a2) == "table" then
-		local j = #a2
-		local n = a2[j]
-
-		for i = #self, 1, -1 do
-			local x = self[i]
-
-			while j > 0 and x <= n do
-				if x == n then
-					remove(self, i)
-				end
-				j = j - 1
-				n = a2[j]
-			end
-		end
-
-		return self
-	else
-		return remove(self, a2)
+	if Position then
+		return self:RemoveIndex(Position)
 	end
 end
 
-function SortedArray.__index:SortElement()
+function SortedArray.__index:Sort()
+	sort(self, self.Compare)
 end
 
+function SortedArray.__index:SortIndex(Index)
+	-- Sorts a single element at number Index
+	-- Useful for when a single element is somehow altered such that it should get a new position in the array
+
+	return self:Insert(self:RemoveIndex(Index))
+end
+
+function SortedArray.__index:SortElement(Signature, Eq, Lt)
+	-- Sorts a single element if it exists
+	-- Useful for when a single element is somehow altered such that it should get a new position in the array
+
+	return self:Insert(self:RemoveElement(Signature, Eq, Lt))
+end
+
+--[[
 local function Empty() end
 
 function SortedArray.__index:Transform(a2, f1, f2)
@@ -147,7 +180,7 @@ function SortedArray.__index:Transform(a2, f1, f2)
 
 		while jceil > j and x > v do
 			f2(j, v)
-			remove(self, j)
+			self:RemoveIndex(j)
 			v = self[j]
 			jceil = jceil - 1
 		end
@@ -174,5 +207,6 @@ function SortedArray.__index:Transform(a2, f1, f2)
 		self[i] = nil
 	end
 end
+--]]
 
 return Table.Lock(SortedArray)
