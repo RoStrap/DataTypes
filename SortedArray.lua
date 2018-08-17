@@ -1,4 +1,4 @@
--- Class that memoizes sorting by inserting values in order
+-- Class that memoizes sorting by inserting values in order. Optimized for very large arrays.
 -- @author Validark
 
 local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
@@ -8,23 +8,23 @@ local sort = table.sort
 local insert = table.insert
 
 local SortedArray = {}
+local Comparisons = setmetatable({}, {__mode = "k"})
+
 SortedArray.__index = {
 	Unpack = unpack;
-	ForEach = table.foreach;
 	Concat = table.concat;
 	RemoveIndex = table.remove;
 }
 
-function SortedArray.new(Array, Comparison)
-	if Array then
-		sort(Array, Array.Compare or Comparison)
+function SortedArray.new(self, Comparison)
+	if self then
+		sort(self, Comparison)
 	else
-		Array = {}
+		self = {}
 	end
 
-	Array.Compare = Comparison
-
-	return setmetatable(Array, SortedArray)
+	Comparisons[self] = Comparison
+	return setmetatable(self, SortedArray)
 end
 
 local function FindClosest(self, Value, Low, High, Eq, Lt)
@@ -37,7 +37,7 @@ local function FindClosest(self, Value, Low, High, Eq, Lt)
 		return nil
 	end
 
-	local Compare = Lt or self.Compare
+	local Compare = Lt or Comparisons[self]
 	local Value2 = self[Middle]
 
 	while Middle ~= High do
@@ -78,7 +78,7 @@ function SortedArray.__index:Insert(Value)
 	local Value2 = self[Position]
 
 	if Value2 then
-		local Compare = self.Compare
+		local Compare = Comparisons[self]
 		local Bool
 
 		if Compare then
@@ -125,6 +125,17 @@ function SortedArray.__index:Copy()
 	return New
 end
 
+function SortedArray.__index:Clone()
+	local New = {}
+
+	for i = 1, #self do
+		New[i] = self[i]
+	end
+
+	Comparisons[New] = Comparisons[self]
+	return setmetatable(New, SortedArray)
+end
+
 function SortedArray.__index:RemoveElement(Signature, Eq, Lt)
 	local Position = self:Find(Signature, Eq, Lt)
 
@@ -134,7 +145,7 @@ function SortedArray.__index:RemoveElement(Signature, Eq, Lt)
 end
 
 function SortedArray.__index:Sort()
-	sort(self, self.Compare)
+	sort(self, Comparisons[self])
 end
 
 function SortedArray.__index:SortIndex(Index)
