@@ -162,6 +162,21 @@ function SortedArray.__index:SortElement(Signature, Eq, Lt)
 	return self:Insert(self:RemoveElement(Signature, Eq, Lt))
 end
 
+function SortedArray.__index:FirstQuartile()
+	local Position = (#self + 1) / 4
+	return self[Position]
+end
+
+function SortedArray.__index:SecondQuartile()
+	local Position = (#self + 1) / 2
+	return self[Position]
+end
+
+function SortedArray.__index:Quartile()
+	local Position = (3 * (#self + 1)) / 4
+	return self[Position]
+end
+
 --[[
 local function Empty() end
 
