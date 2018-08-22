@@ -30,7 +30,7 @@ end
 local function FindClosest(self, Value, Low, High, Eq, Lt)
 	local Middle do
 		local Sum = Low + High
-		Middle = 0.5 * (Sum - Sum % 2)
+		Middle = (Sum - Sum % 2) / 2
 	end
 
 	if Middle == 0 then
@@ -64,7 +64,7 @@ local function FindClosest(self, Value, Low, High, Eq, Lt)
 		end
 
 		local Sum = Low + High
-		Middle = 0.5 * (Sum - Sum % 2)
+		Middle = (Sum - Sum % 2) / 2
 		Value2 = self[Middle]
 	end
 
