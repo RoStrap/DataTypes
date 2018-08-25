@@ -36,7 +36,7 @@ function Array.Flatten(a1)
 end
 
 function Array.Contains(a1, v)
-	-- Returns the index at which v exists with array a1 if applicable
+	-- Returns the index at which v exists within array a1 if applicable
 
 	for i = 1, #a1 do
 		if a1[i] == v then
