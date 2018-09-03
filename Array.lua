@@ -13,25 +13,17 @@ function Array.Flatten(a1)
 	-- Unpacks all arrays in their proper place into a1
 	-- e.g. a1 = {{1, 2}, 3, 4, {5, {6, {{7, 8}, 9}, 10}, 11}, 12}
 	-- becomes: {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-
-	local i = 1
-	local numt = #a1
-
-	while i <= numt do
-		if type(a1[i]) == "table" then
-			local a2 = table.remove(a1, i)
-			local numv = #a2
-
-			for j = 1, numv do
-				table.insert(a1, i + j - 1, a2[j])
+	
+	for Index = 1, #a1 do
+		local Value = a1[Index]
+		if type(Value) == "table" then
+			MyFlatten(Value)
+			for NewIndex = 1, #Value do
+				table.insert(a1, Index + NewIndex, Value[NewIndex])
 			end
-
-			numt = numt + numv - 1
-		else
-			i = i + 1
+			table.remove(a1, Index)
 		end
 	end
-
 	return a1
 end
 
