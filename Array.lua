@@ -15,24 +15,26 @@ function Array.Flatten(a1)
 	-- becomes: {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
 
 	local i = 1
-	local numt = #a1
-
-	while i <= numt do
+	local tlen = #a1
+	
+	while i <= tlen do
 		if type(a1[i]) == "table" then
-			local a2 = table.remove(a1, i)
-			local numv = #a2
-
-			for j = 1, numv do
-				table.insert(a1, i + j - 1, a2[j])
+			local a2 = a1[i]
+			local origin = #a2
+			for x = tlen, i + 1, -1 do
+				a1[x + origin] = a1[x]
 			end
-
-			numt = numt + numv - 1
+			for x = 0, origin - 1 do
+				a1[i + x] = a2[x + 1]
+			end
+			tlen = tlen + origin
 		else
 			i = i + 1
 		end
 	end
-
+	
 	return a1
+	-- Rewritten by movsb.
 end
 
 function Array.Contains(a1, v)
