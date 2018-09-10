@@ -6,6 +6,10 @@
 local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
 local Table = Resources:LoadLibrary("Table")
 
+local type = type
+local insert = table.insert
+local remove = table.remove
+
 local Array = {}
 
 function Array.Flatten(a1)
@@ -19,11 +23,11 @@ function Array.Flatten(a1)
 
 	while i <= numt do
 		if type(a1[i]) == "table" then
-			local a2 = table.remove(a1, i)
+			local a2 = remove(a1, i)
 			local numv = #a2
 
 			for j = 1, numv do
-				table.insert(a1, i + j - 1, a2[j])
+				insert(a1, i + j - 1, a2[j])
 			end
 
 			numt = numt + numv - 1
