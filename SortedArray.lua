@@ -97,10 +97,10 @@ function SortedArray.__index:Insert(Value)
 	return Position
 end
 
-function SortedArray.__index:Find(Value, Eq, Lt)
+function SortedArray.__index:Find(Value, Eq, Lt, U_0, U_n)
 	-- Finds a Value in a SortedArray and returns its position (or nil if non-existant)
 
-	local Position = FindClosest(self, Value, 1, #self, Eq, Lt)
+	local Position = FindClosest(self, Value, U_0 or 1, U_n or #self, Eq, Lt)
 
 	local Bool
 
@@ -162,62 +162,34 @@ function SortedArray.__index:SortElement(Signature, Eq, Lt)
 	return self:Insert(self:RemoveElement(Signature, Eq, Lt))
 end
 
---[[
-local function Empty() end
+function SortedArray.__index:GetIntersection(SortedArray2, Eq, Lt)
+	-- Returns a SortedArray of Commonalities between self and another SortedArray
+	-- If applicable, the returned SortedArray will inherit the Comparison function from self
 
-function SortedArray.__index:Transform(a2, f1, f2)
-	-- Does the steps necessary to transform self into a2
-	-- Calls f1 for each addition to self and f2 for each removal from self
-	-- Functions are called with (index, value)
-	-- @param table self The first sorted array
-	-- @param table a2 The second sorted array
-	-- @param function f1 the first function
-	-- @param function f2 the second function
-	-- @returns nil
-	-- @example	self = {1, 2, 3, 4}
-	--			a2 = {0, 2, 3, 5}
-	--		calls f1(1, 0), f2(2, 1), f2(4, 4), f1(4, 5)
-	-- note the index accounts for how the array shifts as the operations are applied
+	if SortedArray ~= getmetatable(SortedArray2) then error("bad argument #2 to GetIntersection: expected SortedArray, got " .. typeof(SortedArray2) .. " " .. tostring(SortedArray2)) end
+	local Commonalities = SortedArray.new(nil, Comparisons[self])
+	local Count = 0
+	local Position = 1
+	local NumSelf = #self
+	local NumSortedArray2 = #SortedArray2
 
-	f1 = f1 or Empty
-	f2 = f2 or Empty
+	if NumSelf > NumSortedArray2 then -- Iterate through the shorter SortedArray
+		NumSelf, NumSortedArray2 = NumSortedArray2, NumSelf
+		self, SortedArray2 = SortedArray2, self
+	end
 
-	local j, jceil = 1, #self + 1
-	local v = self[j]
-	local Count
+	for i = 1, NumSelf do
+		local Current = self[i]
+		local CurrentPosition = SortedArray2:Find(Current, Eq, Lt, Position, NumSortedArray2)
 
-	for i = 1, #a2 do
-		local x = a2[i]
-
-		while jceil > j and x > v do
-			f2(j, v)
-			self:RemoveIndex(j)
-			v = self[j]
-			jceil = jceil - 1
-		end
-
-		if jceil > j then
-			if x == v then
-				j = j + 1
-				v = self[j]
-			elseif x < v then
-				f1(i, x)
-				insert(self, i, x)
-				j = j + 1
-				jceil = jceil + 1
-			end
-		else
-			Count = Count and Count + 1 or jceil
-			f1(Count, x)
-			self[Count] = x
+		if CurrentPosition then
+			Position = CurrentPosition
+			Count = Count + 1
+			Commonalities[Count] = Current
 		end
 	end
 
-	for i = j, jceil - 1 do
-		f2(i, self[i])
-		self[i] = nil
-	end
+	return Commonalities
 end
---]]
 
 return Table.Lock(SortedArray)
