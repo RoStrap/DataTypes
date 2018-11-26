@@ -7,6 +7,12 @@ local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Res
 
 local Table = {}
 
+function Table.QuickRemove(Tab, Index)
+	local Size = #Tab
+	Tab[Index] = Tab[Size]
+	Tab[Size] = nil
+end
+
 function Table.Move(a1, f, e, t, a2)
 	-- Moves elements [f, e] from array a1 into a2 starting at index t
 	-- Equivalent to Lua 5.3's table.move
