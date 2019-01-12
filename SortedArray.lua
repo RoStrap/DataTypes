@@ -1,4 +1,5 @@
 -- Class that memoizes sorting by inserting values in order. Optimized for very large arrays.
+-- @documentation https://rostrap.github.io/Libraries/DataTypes/SortedArray/
 -- @author Validark
 
 local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
@@ -191,5 +192,23 @@ function SortedArray.__index:GetIntersection(SortedArray2, Eq, Lt)
 
 	return Commonalities
 end
+
+local function GetMedian(self, a, b)
+	local c = a + b
+
+	if c % 2 == 0 then
+		return self[c / 2]
+	else
+		local d = (c - 1) / 2
+		return (self[d] + self[d + 1]) / 2
+	end
+end
+
+-- Five number summary Functions
+function SortedArray.__index:Front() return self[1] end
+function SortedArray.__index:Back() return self[#self] end
+function SortedArray.__index:Median() return GetMedian(self, 1, #self) end
+function SortedArray.__index:Quartile1() local n = #self return GetMedian(self, 1, (n - n % 2) / 2) end
+function SortedArray.__index:Quartile3() local n = #self return GetMedian(self, 1 + (n + n % 2) / 2, n) end
 
 return Table.Lock(SortedArray)
